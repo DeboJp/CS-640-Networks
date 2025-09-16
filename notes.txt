@@ -1,0 +1,166 @@
+# Lecture 1:
+    - Building blocks - nodes and links: links connect any 2 nodes.
+        - Scaling problem (N2) wires(connections from all) or one wire(every connect to one) we dont do either: 
+            we connect nodes to larger router, and routers are connected - more feasible.
+        - Google Search: Host -> query -> internet -> Google Serives- runs on Hosts(Googles' Data centers, etc.)
+            the arrows are communication links - a physical media that carries data.
+            the internet is a network of networks: how to connect multiple hosts, we use routers and switches.
+        ISP: Internet Service Providers - a vendor that offers internet connected services(ISPs talk to each other 
+        as well and each handles a network of networks).
+        
+        Protocols: defines order and format of messages for communication between devices.  Things like encrypting, bits conversion, secure, etc.
+
+        Computer network: A SYSTEM htat provides cross-host commpunication for info exchange.
+
+        Design Reqs: connectivity, reasonable correctness(showing up to data version), reasonable Performance, Low cost, reasonable Security. (In order.)
+
+    Whole picture: harware infra, protocols, TOOLS(CDNS, SDNs, middleboxes, caching)
+        Infra: harware very old(old school building wires), but why internet still so fast?
+        Protocol: navigating traffic, needs wholistic view, similar to maps.
+        Performance: throw more infra resources to prolem(mb to gb, etc) + latency problems(artificial workers).
+        Cost: low, Security: reasonable.
+    Answer? Protocols solve all these?
+
+    Lectures: physical layer, data link layer, IP layer, transport layer, Application (+Security)
+
+# Lecture 2: Layering
+    Serives(i.e. google): has client and server, client intiaties contact,reqeuest. server provides a service.
+
+    What is a link exactly, DSL Home network, connects from home cable to telephone company with multiplexer(resrouse usage), given phone line or isp.
+        - multiplexing - (1) time division time multiplexing, waits one and prioritizes other
+                        (2) parallel multiplexing - frequency division multiplexing. uses a splitter 50 khz to 1mhz for 
+                                                    downstream, 4khz to 50 khz for upstream, 0 to 4khz for two-way telephone.
+                                                    (distance affects ignal, degree of electrical interference, about 24Mbps-52Mbps downstream)
+    Cable link, multiple home cables are connected to a fiber node - a neighborhood junction that support tv signals and network (same concept, 
+            freq division multiplexing, Every physical media introduces noise- media impairment, Tv 54 mhz to 500 mhz, network 54 mhz to 1ghz, 40mbps to 1.2gbps down, 30 mbps to 100 mbps up). 
+
+    FTTH home network - Fiber to home, shared connection to company, sharing the cable itself but direct connection to home.
+
+    5G Fixed Wireless - Ethernet - WIFI - 5G mobile network.
+
+    Main idea: need to share resources(each person cannot get their own link), to bring down costs, by multiplexing, freq and wavelenght.
+
+    Q: is the wired shared for cable and dsl as well or did they have their own connections?
+
+    (History) Message Switching: used telegraph lines - could take in data from any direction and send in cardinal direction of destination(were placed in physical hotspots like paris).
+                                    called store and forward operations - msgs were decoded, next hop in proper route after reading data.
+              Circuit Switching(old analog telephones): Reservation based system, source first establishes a connection(to operator), then swich connections to another user physically. 
+                                                            No one else could use the resource at the same time as you. Dedicated service, really reliable and fast performance.
+                                                            cons: resource management, not scalable, brusty traffic-what if permanent circuit like facebook.
+    Current internet - Packet Switching: Every msg is broken down to packets, break it down to ms intervals. each packet given a source and dest addr. 
+                        Jobs of intermediary nodes to passy the packets along. Store and forward.
+    Circuit vs Packet Switching - Circuit is predictable performance, low resoursce usage. Packet high utilization, simple but not best for 
+                                    extreme reliability but good for bursty traffic.
+
+    PacketSwitching - packets go through switches and routhers to dest. store look and forward devices, takes packets from input ports, looks where to send it, 
+                        does some traffic management, queues into buffers and sends to outgoing ports. Needs to wait for entire packet before putting into buffer(limited capacity).
+                        L = bits, R = device speed, 3 packets take 4L/R since 1st packet just waits at buffer(introduced 1 time delay).
+                        Fixed sized buffer, SRAM static random access memory, fast but hard to scale.
+                        Protocols fill in forwarding table, so routers is able to send packet to matching addr's port. also SRAM.
+
+    Circutit: Reservation based. Packet: On-demand
+
+    SOFTWARE PART: 1. Scalable data movement, 2. Reliable bits delivery, 3. Performance maximization, 4. Resource multiplexing, 5. Access control
+
+    Scalability reqs: many users, diverse services/tech, components built by many companies, diverse ownership, mix/match. 
+    Key idea some sort of protocol: for scalability between heterogeneous things.
+
+    Solution: connects all services with an intermediate layer(standarized - to address heterogenity). allows new advancements above and below layer independently. all must agree to use it.
+
+        OSI Protocol Stack(the intermediate layer) - Open systems interconnection model, each layer relies on services from layer below and exports services to above layer. interface 
+            defines interaction with peer on other hosts - called protocols, standarized. Modules hire implementation layers can change without distrurbign other layers.
+                    
+            THE STACK: Physical: transmit bits. Data Link: Transmit frames. Network: route packages. Transport: send packets end2end. 
+                        Session: how to tie flows together. presentation: byte ordering, security. Application: everything else.
+            (Session and presentation not used a much today integrated into app layer, 7 stack becomes 5 stack)
+
+# Lecture 3: Layering + Performance Analysis
+    life of packet: host (goes down stack from app to phy) -> Bridge/Switch(physical,data,physical) -> Gateway/Router(phy,data,network,data,physical) -> Host again(up the stack)
+    
+    a way to make structure for layer is specifying header.
+    - each layer is adding some info or implemting their own protocol. (html, connection ID, source/Dest, Link addr <- at each layer)
+    - top down from sending side, bottom up from recieveing side.
+    - bits, frame, segment, datagram, message are the info the layers take or add, for respective phy, link, network, transport, app layer. Called encapsulation and Decapsulation.
+
+    multiplexing and demux - there may be multikple implementations of each layer.
+        - each header includes a demultiplexing field that is used to identify the next layer, filled in my sender and used in reciever.
+        - multiplexing occurs at multiple layers.
+
+    App layer example, 
+        - Muliple clients ports in user space exits through socket API(attach socket to a cetain port number is the idea), TCP and IP in Kernel Space, Ethernet adapter in hardware. 
+        - Same thing back up on serverside to single server.
+    
+    OSI/TCP Stack is an hourglass model. Because the intermediay layer is just 1 for internet layer, IP.
+
+        - IP based on minimalist approach - DUMB NETWORK, switches, routers, just do store lookup and forward; routing, addressing, forwarding.
+        - Transport layer and application layer controls more sophistacated(correctiness, congestion control, etc.) functionalities. - main job of internet is to pass things along.
+
+        Advantages: accomodate heterogeneous tech(ethernet, wireless, satelline), support diverse apps(web, windows, ftp, telnet), decentralized network administration.
+    
+    Performance Analysis:
+        Processing delay(sram access delay, string match for addr delay, etc.), queing delay (buffer delays in queue, time to wait to be transmitted),
+        Transmission Delay (time to put info onto comms ports - port/transmission/link wire speed), Propagation Delay (time requred to propagate(wire to end host) over comms link.)
+        Per node is also called total nodal delay, latency.
+
+        Prop vs transmission delays: (propagation delay doesnt matter in close distance(but matters in long distance), transmisssion delays matter always).
+
+        Round trip time, RTT: 2x one way latency ideally, but not always symmetric, the paths and latencies might not be same.
+        Throughput: how many bits per second across 2 points in a network(file size/tranfer time), can only be min(or less) of two path speeds(input/output from switch/router), bottleneck.
+
+        Total percieved delay = initial delay(how long it takes first packet to get from point a to b) + avg sustained throughput(Size/Data Rate).
+
+            Throughput Sensive vs Delay/Latency Limited: if size is small/pings we are dominatied by latency(initial RTT), massive packets are dominated by avg sustained throughput. 
+            - Applicatiion(data size) Dependent.
+
+            - definitions of thoughput differs from layers and intent: 
+                Can be application layer only data, app + headers, different headers, how measurements are done/load, how many flows(1-1 or 1-100), packet rate for data generation, etc.
+                - retransmissions for dropped packets, first data measure or multiple, etc.
+                The 4 delays are fixed though: the processing, queing, transmission, propagation delays.
+        
+            Bandwidth Delay Product: 
+                Bandwidth: number of bits that can be sent instanteously, the circumference area of pipe.
+                Delay - Length of pipe
+                BDP: volume of pipe, the max number of bits that can transpit though pipe at given instant.
+            
+                RTT x Bandwidth = can approximate how much data we can pump into pipe and when to expect the data, to send + get confirmation.
+                    - we pump data and if we get error we chaange, we dont send an initial packet and if it works we send(too slow i think).
+
+                Network Tools, On Terminal:
+                    traceroute (ip/DNS puclic address) - shows all route (might be blocked by ISP,spectrum, etc.)
+                    ping (public website) - shows ping rates
+                    netstat - all the tcp flows that are active, address, active, etc.
+                    IFCONFIG?
+                    sudo tcdump - allows you to acess packets at whatever fidelity, inpect network traffic (Wireshark open source analysis tool)
+                
+# LECTURE 4: Physical Layer
+    Analog vs digital: analog takes continnous vals(sounds,images, etc.), digital takes discrete(texts, data, ex.), can convert bwt them.
+        - analog data can be distorted when sent over network. digital easier, just checks between 0s and 1s. (if long distance data is still distorted, but we place regenerators to reamplify signal-to first sent like)
+    digital nowadays: everything is a common abstraction towards bitstream. advantageous to be on single network.
+
+    Modulation: bitstream over different mediams. ways to modulated waves, AM, PM,FM, amplitude Modulation, freq mod, phase mod (look into images to understand differences).         
+        - does not have to be binary, can be muti-valued.
+
+    Channel: how fast can we make perofrmance at bit stream level. can introduce, noise, attenuation, etc.
+        - Bandwidth is the width of the freqncy range in which the fourier transform of the signal is non-zero. 
+        (given any time signal, can convert to any number of feq sinosidual waves sum of which will be the orig time signal)
+            doing this gives spectrum or freqency data, that allows us to measure bandwidth.(99% of energy seen on data amplitude, various scales(power,log)) db is half power, some scale.
+
+        - Transmission Considerations
+            Limits: random energy (noise) always added to signal. Attenuation: some egery leaks away. Dispersion: attenuation + propagaion speed are freq dept(changes the shape of signal).
+                - effects limit the data rate chanel can sustain, affects differnet trech in diff ways.
+                - effects befome worse with distance. tradeoff between data rate and distance.
+        
+            Pulse transmission rate - channels turns digital signal to pulse(slightly spread out analog like shapes) Wc is the 99% of channel freq content. Up to 1-2Wc we can transmit without issues.
+                if mlti level , 2^M amplitude levels bit rate = 2mWc(bit/pulse * 2Wc) bps, binary pulses bit rrate = 2Wc bps.
+
+            Noise and Reliable Comms: physical systems have noise. create error, we report it though bit error rate (BER).
+                SNR: signal to noise ratio, higher signal compared to noise = higher avg signal power. higher SNR = less errors. SNR decides if bit will be properly flipped when received.
+                Nyquist limit - upper bound you can send through channel ideally. can past limit with multi-valued symbols, but SNR will ultimately decide limit. 
+                    - Maximum possible capacity any noisy channel can supoprt: Capacity-bps, bandwith-hz, S/N-SNR, C = B * Log2(1+S/N) Shannons theorem. no one been able to do better than this.
+                
+                transmission rate(R) < C = arbitarily reliable comms is possible. R > C, then arb reliable comms is not possible.
+                arb reliable means the BER can be made arb small though sufficiently complex coding.
+
+            Bandpass channels: frequency centered at an fc point on wireless mediums(left is wc/2, same right), called carrier frequency. allows radios, telephones, and dsl models(not for wired).
+
+            
