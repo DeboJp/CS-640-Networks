@@ -137,15 +137,15 @@
         - analog data can be distorted when sent over network. digital easier, just checks between 0s and 1s. (if long distance data is still distorted, but we place regenerators to reamplify signal-to first sent like)
     digital nowadays: everything is a common abstraction towards bitstream. advantageous to be on single network.
 
-    Modulation: bitstream over different mediams. ways to modulated waves, AM, PM,FM, amplitude Modulation, freq mod, phase mod (look into images to understand differences).         
+    Modulation fundamentals(amplitude, feq, phase): bitstream over different mediams. ways to modulated waves, AM, PM,FM, amplitude Modulation, freq mod, phase mod (look into images to understand differences).         
         - does not have to be binary, can be muti-valued.
 
-    Channel: how fast can we make perofrmance at bit stream level. can introduce, noise, attenuation, etc.
+    Channel characterization(bandwidth,BER,SNR): how fast can we make perofrmance at bit stream level. can introduce, noise, attenuation, etc.
         - Bandwidth is the width of the freqncy range in which the fourier transform of the signal is non-zero. 
         (given any time signal, can convert to any number of feq sinosidual waves sum of which will be the orig time signal)
             doing this gives spectrum or freqency data, that allows us to measure bandwidth.(99% of energy seen on data amplitude, various scales(power,log)) db is half power, some scale.
 
-        - Transmission Considerations
+        - Transmission Considerations ( Fundamental Limits: Nyquist limit, shannon limits)
             Limits: random energy (noise) always added to signal. Attenuation: some egery leaks away. Dispersion: attenuation + propagaion speed are freq dept(changes the shape of signal).
                 - effects limit the data rate chanel can sustain, affects differnet trech in diff ways.
                 - effects befome worse with distance. tradeoff between data rate and distance.
@@ -163,4 +163,53 @@
 
             Bandpass channels: frequency centered at an fc point on wireless mediums(left is wc/2, same right), called carrier frequency. allows radios, telephones, and dsl models(not for wired).
 
-            
+# LECTURE 5: Physical Layer
+    Digital Modulation 
+        Baseband mod: send the bare signal - copper media, low feq(typically at 0 Hz).
+        Carrier mod: use the signal to mod a higher feq signal, called a carerr. can send the signl in a particular particular part of the spectrum, i.e. wireless, radios, etc. (need to make space and move around freq channel.)
+            how to do: amplitude career modulation, multiply digital voltage signal with career frequency to shift signal left or right on GHz channel, typical signal take small chunks in mHz. Creates twice the bandwidth, since mirrors on negative direction of shift as well.
+            Implication of Carrier mod: Bandpass channel has bandwidth Wc, but due to mirror only 1/2 is useful. syetm suupports Wc but baseband challen has Wc/2 Hz available.
+            Pros: idfferent users can use differnts part of channel, also known as frequency division multiplexing, though carreir modulation. (can be done by freq mod,phase mod, etc. - define fc,ft as locations)
+        Demodualate-recover, by multiplying by 2cos(2pifct) for T seconds and low pass filtering(smoothing) - grabs the baseband signal discernable, and grab individual bitstream.
+    line coding(wired): 
+        Synchronizations of clocks in transmitters and recievers: but clock drift causes a loss of synchronization over a perod of time, even if both agree to freq due to hardware limitations. (True for wireless as well.)
+        Asynchronous Transmission: 
+            encoding converts binary to info seq into digital signal, sendedr then uses the digital signal tomodulate the sggnal in a way the reciever can recognize:
+                - why need: synchronization issues, bit flips: error detection and correction, control symbols: start of end of bit seq/frame, electrical limits: avoid long seqs of ones or zeros.(all can be addressed via encoding - typically 1 level before phase feq/modulation)
+            Line coding tech: 
+                    naive Manchester Encoder: send both data and clock directions. issue: 2x electrical switches per bit. wasting two bits to send 1 bit of info.  (Also known as 1b/2b encoding, generall good no drift but inefficient)
+                    Non Return to Zero: holds if same bit. sync loss due to lng seq of 1s or 0s, volt and clock can difts
+                    NonReturn to Zero: every 1 switch, 0s holds sequence, sync loss due to long seq of 0s, increases number of electrcal switches per bit.
+
+                    mBnB Encoding, m data bits are coded as symbols of n line bits(i.e. 4B5B - encode all 4 bits combinations to 5 bits that avoid long seqs and unique: can use 5bits, adv of clock drift and vold drift over time). Q: is it similar to manchester encoding?
+                        gigabit over fiber uses - 8B/10B, 10Gigabit - 64B/66B.
+    error control:
+        workflow: (FEC - forward error correction)
+            Transmitter: Bits to Fec to mod to signal.
+            Reciever: signal to demod to fec to bits.
+        Error Control: challens intro errors in digital comms, applications require certain reliability.
+            ensures data stream is transmitted to certain level of accuracy despite rrors.
+            two approaches: error retection and Retransmission(ARQ - resending data), Forward error correction(FEC - add extra data to correct as data psses along)
+            can be done at multiple layer - wifi phy layer perform conv coding, etc.
+
+        Key idea: data transmitted in blocks(codeblocks) to satisfy a pattern, no pattern then error. 
+            can add extra bits to carry over info.
+        
+        Single Parity Check:
+            - append a parity to k info bits, all codewords have even # of 1s. All eroors that create odd 1s are detectable as errors.
+            - but if two flips happen, cannot detect. 
+            Q: we are saying we can detect odd bit flips, what about more than 3 flips how to check/know? ignore?
+        
+            - redundancy: some overhead to add bit.
+            - all patterns with odd # of errors can be detected.
+            - randon bit errors: many transmissions channels introduce bit errors at random indep of each other with some prob.
+                we grab joint probabilities, if channel has p>=0.5 not worth wile to send over channel.
+                Undetectable error: when even bit fits. n choose 4. number of other flips likelyhood gets smaller as it increases.
+
+        what is good code? map by distance codewrods, if multiple valid/non-codewords codewords distributed somewhat uniformly its good, clustered of one kind might be getting confused.
+            2D parity checks: we use row/col sums to detect, in number of 1s in row/col are even no error, odd errors?. 1,2,3, errors can always be detected but patterns >4 can not be detected. 1bit errors can be detected and even corrected.
+        checksum over intenet: to see calculation is equa to zero, can use modulo arithmetic but also binary.
+    
+    Q: confused about checksum, 2D checks, 1 bit detectable how if >2- just probability?
+
+# LECTURE 6: 
