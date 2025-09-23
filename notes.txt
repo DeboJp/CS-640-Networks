@@ -170,7 +170,7 @@
             how to do: amplitude career modulation, multiply digital voltage signal with career frequency to shift signal left or right on GHz channel, typical signal take small chunks in mHz. Creates twice the bandwidth, since mirrors on negative direction of shift as well.
             Implication of Carrier mod: Bandpass channel has bandwidth Wc, but due to mirror only 1/2 is useful. syetm suupports Wc but baseband challen has Wc/2 Hz available.
             Pros: idfferent users can use differnts part of channel, also known as frequency division multiplexing, though carreir modulation. (can be done by freq mod,phase mod, etc. - define fc,ft as locations)
-        Demodualate-recover, by multiplying by 2cos(2pifct) for T seconds and low pass filtering(smoothing) - grabs the baseband signal discernable, and grab individual bitstream.
+        Demodualate-recover, by multiplying by 2cos(2pifct) for T seconds and low pass filtering(smoothing) - grabs the baseband signal discernable(from modulated carrer or baseband), and grab individual bitstream.
     line coding(wired): 
         Synchronizations of clocks in transmitters and recievers: but clock drift causes a loss of synchronization over a perod of time, even if both agree to freq due to hardware limitations. (True for wireless as well.)
         Asynchronous Transmission: 
@@ -199,6 +199,7 @@
             - append a parity to k info bits, all codewords have even # of 1s. All eroors that create odd 1s are detectable as errors.
             - but if two flips happen, cannot detect. 
             Q: we are saying we can detect odd bit flips, what about more than 3 flips how to check/know? ignore?
+                - just able to detect some i believe that become odd. even not detectable or even+odd just detects an error.
         
             - redundancy: some overhead to add bit.
             - all patterns with odd # of errors can be detected.
@@ -207,9 +208,46 @@
                 Undetectable error: when even bit fits. n choose 4. number of other flips likelyhood gets smaller as it increases.
 
         what is good code? map by distance codewrods, if multiple valid/non-codewords codewords distributed somewhat uniformly its good, clustered of one kind might be getting confused.
-            2D parity checks: we use row/col sums to detect, in number of 1s in row/col are even no error, odd errors?. 1,2,3, errors can always be detected but patterns >4 can not be detected. 1bit errors can be detected and even corrected.
+            2D parity checks: we use row/col sums to detect, in number of 1s in row/col are even no error, odd errors?. 1,2,3 bit, errors can always be detected but patterns >4 can not be detected. 1bit errors can be detected and even corrected.
+                check every rows and columns to see if count of 1s even or odd. then check if right and bottoms intersection is both odd, then error?
+                cannot localize, just detect there is an error.
         checksum over intenet: to see calculation is equa to zero, can use modulo arithmetic but also binary.
     
     Q: confused about checksum, 2D checks, 1 bit detectable how if >2- just probability?
+        - prob for how many bits are flipped.
+        - checksum below
+        - 2d checks if parity of extra row/col added at the end shows odd, then error. 1,2,3 detectable, 1 fixable. 
 
 # LECTURE 6: 
+    Other Error Detection Codes:
+        Internet Checksum - inject known pattern, i.e. sequence even or sum of bits is 0, etc. for our case I.C. makes sum of bits is 0 by injecting an extra bit.
+            checksum -*(adds all bits) mod (2^16 -1). add this back all bits, and sum mod 2^16 -1 should be 0. bit flips errorrs dont correct checksum.
+
+        Cyclic redundancy Chekc(CRC) - for error detection though polynomial algebra.
+
+        Repetition Code - Error correction code. sed repeated times and detection and correction by majority vote.
+            High redundancy. adv codes(similar alts) - hamming, reed solomon, convolution codes, etc.
+
+    QA Touch Base of past topics.
+        - low pass filter, reduce freq of data, high pass allow more data to pass
+        - bandpass channel, pass only a part of data, bandpass neg filter - take out a bandpass chunk of data.
+        - rest edited into above notes.
+
+    DataLink Layer:
+        4 concepts - framing, switching, medium access control, reliable transmission.
+
+        Frames:
+            how we break up a stream of bits to frames(packets for higher level): a preamble + postamble (start/end token) + body.
+            no minimum-can send smalle frames, but max above which need to be broken into multiple frames.
+
+            Tech 1: Byte stuffing: sync markers, start header and start of text in preamble, postable end of text, checksum.
+                sync markers might endin body, use escape character.
+            Tech 2: Byte Counting: include a bute found and frame class in preamble to verify count in body if it matches. no start or end text marker.
+                - but if counter bit is wrong-bitflip error, count wrong. checksum can detect and say if wrong though.
+            Tech 3: Bit Stuffing: have a beg seq befor eheader, and end seq after crc. 
+                add 0 for every 5 1's in body. receiver knows to see this pattern.
+            Q: but how would we know if the seq had 5 origianlly or not? and how to detect ending, wont it just add 0?
+                 - i supposed for end its after crc, so it would expect it after crc.
+                 - count per bit sequence should be extra bits if bit 0 stuffed. (padding added in general to handle extra bits)
+
+            
