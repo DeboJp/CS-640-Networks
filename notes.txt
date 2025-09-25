@@ -251,3 +251,35 @@
                  - count per bit sequence should be extra bits if bit 0 stuffed. (padding added in general to handle extra bits)
 
             
+# LECTURE 7: DataLink Layer (Continued)
+
+    Switching:
+        ethernet - wired computer network technology.
+        ethernet framing - does its own thing, preamble 8 bytes - separate technique than we studied. then eth Frame, then checksum(4b) at end. (error control happens everywere, data, physical, app, etc.)
+            mac address - media access control 
+            (6b and 6b for source and dest addr)
+            type field (2b) used by payload follows, type specifies protol like ipv4
+        switch has 2 stacks - max ability it can pass the data, is the data link layer. (has ports, addr lookup, traffic manager, que/buffer)
+        table - if no match for addr will broadcast on all ports(except ones its coming from) - uses source addr and port so populates table. to make addr and port connections.
+                - after tablel fill might be able to grab success hits. Only stores/looks up and forward.
+                - ports just tell what is the next hops not final seq.
+        switches need whole frame to come along.- classical
+        cut-through switchnig - doesnt wait, if dest comes through and very low errors just pass it though.
+
+        L2 Switching - enables scaling. 
+        
+        Forwarding Loop - waste when frames stuck in a look when trying to find sourceinit/dest.
+
+        Spanning Tree Protocol(SPT) - convert cyclic graphs to trees. elect single switch as root switch. then travel to root then there is path to everywhere.
+            - states kept at switch, another table(which know only their ids)
+            - create a configuration message, to populate(imagine flood fill), root id, local id and distance to root. Keep issued periodically since things can happen(data lost, system down, etc.)
+            - all switches when they start will think they are the root.
+            (Switch operation assigns which switch has what id)
+            - ACtions when recieve message - figure lowest number i.e.1 to assign root. communicate and find broadcast yes direction 
+                - 2nd challenge path determination: resolve tiebreaks, make distance smaller, find root, disgrad everything else if not root. (most redundance link/edge/fartest connection determined though tiebreaker cut off - ports disables)
+                    (i.e. switch 2 gets msg from sw1, finds sw1 id is less, adds dist +1 and stores with port number which it came from. if optimistic then broadcasts)
+            
+
+
+
+            
