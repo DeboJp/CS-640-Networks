@@ -279,7 +279,32 @@
                 - 2nd challenge path determination: resolve tiebreaks, make distance smaller, find root, disgrad everything else if not root. (most redundance link/edge/fartest connection determined though tiebreaker cut off - ports disables)
                     (i.e. switch 2 gets msg from sw1, finds sw1 id is less, adds dist +1 and stores with port number which it came from. if optimistic then broadcasts)
             
+# LECTURE 8: DataLink Continued
 
+    Medium Access:
+        Schedule Access: schedle frame transmissions to avoid collisoins in shared medium.
+            Pros:enhance fairness, more efficient channel utilization, less variable.
+            Con: increaded procedural complexity.
 
+            can be run in centralized system or distributed system, to determine transmission order.
 
-            
+            we run in reservation cycles, if hosts ones to send data they ask for permission and get a slot, called reserved interval.
+                - some wastage but wokrs, slots found though time division multiplexing and hosts reserved as such, depends on algo single frame or multi frame reservation.
+                - another way is random access reservation.
+
+    Random access:
+        same againa, shared medidum, we all trying to share resources.
+
+        detec collisions and recover from collision, via delayed retry. data not sent at the same time to avoid collisison.
+            Aloha(wireless): radio based comms, whenevr ready transmit, recieverrs send ack back. if ack never recieved/send, we just retry with random delay to avoid collisions. if ack gottem move on next packet.
+                - large collisions: then delay based on num of users. i.e. small if small users, vice versa. - too short
+                - too long - underutilized.
+                count total num of packets arrived at a time - use binom? mean = np, mean num of packets you can get in a certain amt of time.
+                    poisson dist approx to binom dist ** when np is fixed ** and n is large or very small. (event counting process. need lambda/rate(in fixed time and independent))
+                        can go from pdf to cdf dist using integral and back with differentiation.
+                        if we know inter-arrival time between two process/events, we can convert it to number of collisions - probability of seeing how much of a time delay. to get individual time frames within that time frames, we differenciate and distibution becomes exponential(satisfies memoryless property).
+                        othe property - if there n clients, each can have their own generation rate then go into medium. just an addition operaion on lambda.
+                vulnerability: any two packets , packed before and after so 2m duration that vulnerable, just retransmit over air.
+                Analysis: S is total amt of data we want to get through, G different arrival rate every time(load on system). We define success we in 2m there is no arrival. Max throughput, Ge^-2G.
+            Ethernet MAC(ethernet):
+
