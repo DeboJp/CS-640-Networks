@@ -292,19 +292,37 @@
                 - some wastage but wokrs, slots found though time division multiplexing and hosts reserved as such, depends on algo single frame or multi frame reservation.
                 - another way is random access reservation.
 
-    Random access:
-        same againa, shared medidum, we all trying to share resources.
+        Random access:
+            same againa, shared medidum, we all trying to share resources.
 
-        detec collisions and recover from collision, via delayed retry. data not sent at the same time to avoid collisison.
-            Aloha(wireless): radio based comms, whenevr ready transmit, recieverrs send ack back. if ack never recieved/send, we just retry with random delay to avoid collisions. if ack gottem move on next packet.
-                - large collisions: then delay based on num of users. i.e. small if small users, vice versa. - too short
-                - too long - underutilized.
-                count total num of packets arrived at a time - use binom? mean = np, mean num of packets you can get in a certain amt of time.
-                    poisson dist approx to binom dist ** when np is fixed ** and n is large or very small. (event counting process. need lambda/rate(in fixed time and independent))
-                        can go from pdf to cdf dist using integral and back with differentiation.
-                        if we know inter-arrival time between two process/events, we can convert it to number of collisions - probability of seeing how much of a time delay. to get individual time frames within that time frames, we differenciate and distibution becomes exponential(satisfies memoryless property).
-                        othe property - if there n clients, each can have their own generation rate then go into medium. just an addition operaion on lambda.
-                vulnerability: any two packets , packed before and after so 2m duration that vulnerable, just retransmit over air.
-                Analysis: S is total amt of data we want to get through, G different arrival rate every time(load on system). We define success we in 2m there is no arrival. Max throughput, Ge^-2G.
-            Ethernet MAC(ethernet):
+            detec collisions and recover from collision, via delayed retry. data not sent at the same time to avoid collisison.
+                Aloha(wireless): radio based comms, whenevr ready transmit, recieverrs send ack back. if ack never recieved/send, we just retry with random delay to avoid collisions. if ack gottem move on next packet.
+                    - large collisions: then delay based on num of users. i.e. small if small users, vice versa. - too short
+                    - too long - underutilized.
+                    count total num of packets arrived at a time - use binom? mean = np, mean num of packets you can get in a certain amt of time.
+                        poisson dist approx to binom dist ** when np is fixed ** and n is large or very small. (event counting process. need lambda/rate(in fixed time and independent))
+                            can go from pdf to cdf dist using integral and back with differentiation.
+                            if we know inter-arrival time between two process/events, we can convert it to number of collisions - probability of seeing how much of a time delay. to get individual time frames within that time frames, we differenciate and distibution becomes exponential(satisfies memoryless property).
+                            othe property - if there n clients, each can have their own generation rate then go into medium. just an addition operaion on lambda.
+                    vulnerability: any two packets , packed before and after so 2m duration that vulnerable, just retransmit over air.
+                    Analysis: S is total amt of data we want to get through, G different arrival rate every time(load on system). We define success we in 2m there is no arrival. Max throughput, Ge^-2G.
+                Ethernet MAC(ethernet): ...(later Lecture)
 
+# LECTURE 9: DataLink Continued
+                Slotted aloha: (assumed all devices share notion of time/clock/synchronize) assumed all devices designated slots, if collisions they retry with another slot, until successful.
+                    vulnerability period is just M now. max they can collide in M interval/time duration, since they have same idea of time(slots). Throughupt = S = Ge^-G
+                    higher throughput than pure Aloha, but takes a longer time, larger load on system, some latency due to fixed slot sizes.
+
+                Ethernet MAC(Wired Medium): carrier sense: listen before you talk(CarrierSense), listen if someone else is using it, avoid collosion with active transmission.
+                    You can also listen while you transmit(CarrierDetection), no need to wait for acks. only needs to listen to narrow range of powers compared to wireless which needs to listen to wide range/orders of magnitude.
+                        if detect someone is tranmitting causing collision(both/all), then jam channel and stop, with backofffs(small if less clients, more if many) to retry. after a while if it doesnt transmit, Discard packet.
+                    packets must be long enough to gurattee all nodes observe collision(and can jam if necessary - too short kinda useless/breaks algo). min packet length > 2x max propagaion delay.
+                    Ethernet not based CSMA/CD no longer done, due to duplex capability(worst case for conflict if two would want to share wire, and there is two parallel wires so never happens). Wireless still uses variations of Aloha. 
+    Reliable Transmission:
+        reciever sends acts for each frame recieved, with identifier so sender knows whcih was recieved and now.
+        frame missing? dropped while sending, or while sent back, or if reciever drops it. so need to retry after certain after time.
+            sometimes reduce flow so other people dont drop packets.
+        Technique 1: Stop and Wait. send msg out and wait to hear back if act. if ack gotten we know reciever is able ot recieve at this pact. if not, many reason(slow,etc) retry again later.
+            if fast reciever, smaller timeout periods. can sometimes give duplciated acks if too fast reciever, but not a problem.
+            cons: a lot of waiting, cannot fully utilize bandwidth, but easy to implement.
+            idea to fix: send streams of data instead of single packet, and adjust accordingly.
