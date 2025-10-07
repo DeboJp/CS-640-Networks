@@ -319,10 +319,42 @@
                     packets must be long enough to gurattee all nodes observe collision(and can jam if necessary - too short kinda useless/breaks algo). min packet length > 2x max propagaion delay.
                     Ethernet not based CSMA/CD no longer done, due to duplex capability(worst case for conflict if two would want to share wire, and there is two parallel wires so never happens). Wireless still uses variations of Aloha. 
     Reliable Transmission:
-        reciever sends acts for each frame recieved, with identifier so sender knows whcih was recieved and now.
+        reciever sends acks for each frame recieved, with identifier so sender knows whcih was recieved and now.
         frame missing? dropped while sending, or while sent back, or if reciever drops it. so need to retry after certain after time.
             sometimes reduce flow so other people dont drop packets.
         Technique 1: Stop and Wait. send msg out and wait to hear back if act. if ack gotten we know reciever is able ot recieve at this pact. if not, many reason(slow,etc) retry again later.
             if fast reciever, smaller timeout periods. can sometimes give duplciated acks if too fast reciever, but not a problem.
             cons: a lot of waiting, cannot fully utilize bandwidth, but easy to implement.
             idea to fix: send streams of data instead of single packet, and adjust accordingly.
+
+# LECTURE 10: Datalink + IP Layer
+        Technique 2: sliding window, windows of continous frames, best cases - all delivered and get acks for all windows. avg: 7 delivered and 3 not(retry for 3), but still thoughput is good since ew didnt have to wait.
+        sender: has to maintain state: window size(SWS), LAR: last ack recieved(LAR), last frame number sent(LFS)
+        reciever: has similar state: RWS-recieve winodw size(largesta acceptable window else simply drop since too fast), LAF-seq of largest acceptable frame, LFR-seq num of last frame recieved
+            accpet frames only if less than end of window/LAF, and accept LFR +RWS.  if LFR>RWS discard frame and don send ack. (similar idea for sender)
+        acks are recieved per frame not window. 
+
+    IP/Network Layer: Efficient addressing, routing, inter domain routing, (NAT,IPv6,Multicast)
+        switched local area network: connect several local networks to scale. how- interNetworking
+
+        interNetworking: an arbitary collction of networks connected 
+        Interent Protocol - run over all entities in a collection of networks, define infra that allows all to work as a single logical network. everyone agreed on a standard.
+            also known as hourglass model.
+            Best effort networking: use unified header format, support heterogeneous ntworks, provide unreliable packet delivery.
+                header: version, HLen(header length), TOS(terms of service: tells method being followed), length, identification, flags+offset, TTL(tile to live), Protocol(demultiplex key i.e. TCP=6, UDP=17), Checksum, Sourde addr, destination addr.
+                adapt ip datagram to underlying L2 farme: fragmentation and reassembly or synchronize
+                    Frag and reassem: idea break IP data gram when traversing a link based on the small sized MTU. 
+                        Strategies - idea breakkdown ip datagram when traversing link based on small sized MTU.
+                            bread down datagram when necessary , avoid fragmentation at source, refragment the datagram if ppossible, delay reassembly until destination, do not recover from lost fragments(ask full retransmit instead of just lost fragment).
+                            happens on need by need basis in the network entity.
+                            can put flag saying dont fragment, or more fragments, etc. and specify th offset of fragment relative to beginnign so later know how to stitch, same packet number thats how we know same packet.
+
+                    synchronize MTU: source tries to figuire out min mtu on path.send small msg, plz do not fragment to on. just drops bigger packets, sends ICMP to source saying error MTU exceeded. 
+                        originally Ipv4, IPv6 delegates it to end hosts. 
+                        if paths dont change, and query for ICMP msg.
+                        Icmp - supporting protocol for IP to handle any errors, report status to source host so it can react accordingly.
+
+                Unreliable Packet delivery: no gurantee of how data is transmitted, lost, delivered out of order, duplicated, etc. above layers handle it.
+                    
+                L3 can create new ethernet frames(i.e.in fragmentation), L2 can only lookup and forward.
+                    in L3 for new frames - source and dest same but MAC addr changes(MAC of router used for next hop).
