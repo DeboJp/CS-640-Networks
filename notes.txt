@@ -358,3 +358,69 @@
                     
                 L3 can create new ethernet frames(i.e.in fragmentation), L2 can only lookup and forward.
                     in L3 for new frames - source and dest same but MAC addr changes(MAC of router used for next hop).
+
+    Packets are also called datagrams
+
+# LECTURE 11: IP/Network Layer
+    Forwarding/swtitchinig - taking input to output after looking at routing table.
+        Delays: processing, queing, transmission, propagation.
+    Routing - routers optimizes processing dealay in hardware makes it fast.
+        determines end to end paths, implemented in software.
+        implemented in L3, switches source if switch passes though,
+        Delays: same delays.
+    
+    Efficient Addressing:
+        ip addrs - defferentiate communication entities, determine how data is transmitted, impact the network scalability.
+        ip addr is owned by an interface(every interface can have multiple ports). 
+        every interface has its own Ip address.
+        
+        Dotteded decinal notation: an ipv4 address has 32 bits - 4 billion unique addresses. 
+        Five IP CLASS:
+            Class A address - 0,can have 2^7 networks, but can have many hosts
+            B address - 1,0, can have 2^14 networks, lesser hosts.
+            C addr - 1,1,0,can have 2^21 small netowrks, 8 hosts very small.
+            Class D - multicast, reserved for multicasting, send to a group of ip address from one source.
+            Class E - more experimental/research/dev.
+            (all class networks are taken), each class has a 0,1,1s(diff size for each class) can they are matched with router with prefix matching, insteading of direct/complete matching.
+
+            Classful Addressing is inefficient - 
+                address waste, class C with 2 hosts 0.78% efficiency, but clas B with 257 hosts efficiency 0.39% efficiency
+                still too many netowrks = routing tables become expensive that cannot scale(too many rows in table even though its 2^7 + 2^14 + 2^21), route prop protocols dont scale.
+            
+            Subnetting(Class B) - add another addr hierarchy, the subnet masks(just 1's to make prefix matching easy - if arbitary mask cannot use prefix matching) makes network much more flexible(to give number of host devices).
+                - instead of neeting 3 classes for each organization. all organizations can operate in their own network/subnets, with the same class network.
+                - perform bitwise and host number + mask to get which how many data(to get subnet number).
+                mast last number is 128 and sunet is 0, hosts can ahve 0-127 address(at the very end.)
+                    if both 128, then 12-255
+                    last bit addr always left for broadcasting.
+                can use slash numbers /24 to freeze for only 24 address for hosts.
+
+            Supernetting(Class C) - enable network to be any length, collapse multile addr assigned to a single entityy, assign block of continous network numbers to nearby networks.
+
+            CIDR - Classless mechanism to make t more free. Breaks rigit boundareis between addr classes, combine subnetting and supernetting.
+                - first 16 bits still frozen, + 4 as well sice next 4 aways stay at 1, total 20. 2^12 address are possible.
+                - idea is aggregating class C address.
+                Can use CIDR for trad networks as well, by /8,/16,/24 to freeze first few addrs, and they act like classes again.
+
+            IP vs Mac
+                Mac; physical harware addres not made for routiing, given by manufacturer(if something falls in local area network, then useful - to send frame to address since switch can see.).
+                IP - can used for routing.
+            
+            ARP protocol - each hosts has a map between mac and ip. to communicate with hosts on same switch network, each host needs to know the desk mac address. 
+                routers also ARP from time to time, if fdest host is on same subnet then use its MAC from ARP cache,e sle forward to next IP addr hop.
+                table contents learned using arp protocol, and cached when updated.
+                Otherwise, routing only cares about IP, switch no concept of IP so need to know. routers cares about mac to match local.
+            
+            How to assign ip address: 
+                Technique 1: Manual Config(static ip) - add ip addr with this mask to this host. (ip a add 192.168.1.100/255.255.255.0 dev eth0)
+                    drawbacks manually for all hosts, easy to make mistakes.
+                
+                Technique 2: DHCP(dynamic host config protocol) - a dedicated service for assigning IP for each admin domain
+                    a dhcp server maintains a pool of all available addresses. leases for IP are perodically updated.
+                    Works - arriving client sends a special IP broadcast msg to the network, recipient for DHCP is always 67, msg that goes from client is DHCPDISCOVER. Transaction ID and machine addr helps server prevent assigning clashing addresses. 
+                        DHCP Offer - server sends out of src 67 to 68 broadcasting(all 255), and DHCP server ID, and lifetime offer(need to accept in 1hr for ex) for client to accept. machine address used to see if host should accept, everyone sees messages.
+                        DHCP request - client makes a decision.
+                        DHCP ACk now client has that address (but dhcp sitll broadcasts since it doesnt know for sure - small packet not a burden on network/to avoid issues if something goes wrong). (Total 4 steps.)
+
+# LECTURE 12: Routing
+
