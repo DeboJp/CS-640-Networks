@@ -423,4 +423,24 @@
                         DHCP ACk now client has that address (but dhcp sitll broadcasts since it doesnt know for sure - small packet not a burden on network/to avoid issues if something goes wrong). (Total 4 steps.)
 
 # LECTURE 12: Routing
+    to populate routing table only need subnet number and subnet mask - know if dest inside or outside subnet.
+        every row has subnetnum, subnetmask, nexthop. dest+subnetmask if same as subnetnumber then prob within subnet/send to router or hop to next.
+    routing challenges - network traffic is dynamic, they only know neighbors no full picture.
+    native approach - static(can appear and dissapear) config,, calc path manually fill routing table. Drawbacks no adaptation, unable to scale.
+
+    Distance vector routing algo/protocol: 
+        assumption: key idea you know your neighbor, and cost of sending the data to your neighbor.
+        key idea constructs 1D vetor that contains cost and distance, distribtues to neighbors. Distributed system.
+        perodic cycle that happens. this communication adds weights for cost, for every dest and next hop from curr hop, so at the end every router knows how to get to destination. 
+            in spirit similar to spanning tree algo. but msgs dont need to send all the way to dest, only to neighbors.
+        reaches euqilibrium unless some node fails/deletes or added.
+            slow converging issue to get to equilibrium for whole network. old data creates a negative  loop to infitey, simple fix, if it goes beyond a certain number just drop it.
+        hard to do time sync with clock with such large graphs.
+
+        Fist distance vector algo - Routing Info Protocol (RIP):
+            udp packet to ports, freq = 30, if val reached more than 16 for our case we drop.
+            earliest ip routing protocol.
+
+
+
 
