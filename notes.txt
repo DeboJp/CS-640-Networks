@@ -441,6 +441,32 @@
             udp packet to ports, freq = 30, if val reached more than 16 for our case we drop.
             earliest ip routing protocol.
 
+# LECTURE 13: IP Layer: Routing(Continued)
 
+    last lecture we talked one type of routing. Link statte more populat, relaxes assumption abt talking to neighbors, talk to whole. Each node has info of whole network. finds shortest path between two nodes.
+        sending link state/condition of neighbors to neighbors, converges quickly under static conditions. sending raw conditions of your connections, all nodes have whoistic info, more efficient to propagate though network
+    
+    LINK STATE ROUTING:
+        Reliable flooding(broadcasting)
+            node sends link state to all directly connected, each node recieves and forwards it out to all its links.
+            link state packet(LSP) includes, ID of node, cost of link to each directly connected, the seq number, time-to-live(TTL-decrements every forwardings, i.e. travel max of 64 hops) of this packet.
+            reiability - decrement TTL while flooding. also age decreases in the LSP in its own table for each table, Discard the LSP when TTL becomes 0 or age too old(no updates in long time).
+            each node gets image of network.
+        route connection
+            compute shortest(min cost) path between any two nodes i and j. from you to everybody else. dijkstras algorithm (a* theorreticlaly faster but not direction info for ip addresses-cant make heuristic algo other than cost minimization, algo only runs on local network for serity, pass to next router entry Gateway they do their own routing).
+            protocol called - Open shorted path first(OSPF) header has version, type msg ength, source, areaid, (checksum ,auth type) both to avoid fake link state ad to propagate - sanity check if data is correct, auth, etc.
+            LSP have - link state id, advertising router, cost of lists, seq number SEQ, TTL of packet, TOS - terms of service(router can use info to break ties custom coding i.e. use lower latency if costs were bandwidth only - i.e. ISP gave certain host max data for certain time only), LS seq number - general advertisement(always propagated - periodically send to avoid dropping + and -, bigger packet) or keep alive msg(tell neighbor still connected to avoid flooding, tiny packet).
+
+            Link state Routiing - high messaging overhead, computing complexity
+            Distance vector - slow convergence, race conditions
+
+            Why link better? dijkstras(typically slower), ~ 1/2 packet size(but all needs to prop), drop off : main reason is pretty much the flooding idea.
+            distance vector kinda like a tree waits for every node before it moves forward, LS more like flooding from each node simultaneously.
+
+        Metrics for Link Costs- 1. number of hops, 2 link cost, latency and bandwidth - can use acks from rotuer to router to approx these.
+            - arrival time - departure time + transmit + latency = approx delay, can use this as cost.
+        Architecture:
+            also is run in software not hardware, some seconds in convergence. prolly not update every LS ad update we use some specific condition to push updates.
+                table in hardware. faster.
 
 
