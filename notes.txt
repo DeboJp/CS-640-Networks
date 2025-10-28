@@ -469,4 +469,54 @@
             also is run in software not hardware, some seconds in convergence. prolly not update every LS ad update we use some specific condition to push updates.
                 table in hardware. faster.
 
+# LECTURE 14: Ip Layer: Inter Domain Routing
 
+    two options for rouitng: distance vector and link state. (intra domain solutions - routing inside smaller domains)
+    domain is an smaller organizatoin under the same admin control, refer to as Autonomous system(AS),16 to 32 bit unique number. every organizaison gets 1.
+    (routing between domains, larger we wont be using these directly.)
+    itra domain routing - how will route out of domain without table entries.   
+        most routers are interanl within AS, some gateway routers connect to one or more routers in other AS - inlet/outlets to talk to other domain.
+        if no mach in routing table send it to gateway router. it should be able to send it.
+        internal msg - advertise the prefix reachability within an AS
+        external msg - advertize prefix reachability outside an AS - prefix matching to find which AS might have x.
+
+    BGP border gateway patrol
+        eBGP distribute spanning neighbor two AS
+        iBGP distribute interally
+        runs of TCP
+
+        route selection: next hop - ip adr the router interface that begins as path. as pact is the list of ASs though which advertisements has passed.
+            entire path is being communicated in msg, concanating and passing it along differnt ASs. (differnt from intra, has entire path in msg.)
+            after BGP, it see maybe 2 possible paths, we do hot potato routing(total len or hops to go to final dest). gives flexibility to AS to whatever selection it want to make.
+            reality very complicated
+
+    Autonomous System
+        AS traffic types - local start or end within an AS, Transit pass though AS.
+
+        Types 
+        sub AS - has single connection to other AS carries local traffic only.
+        multi homed As - has connections to more than one AS, refuse to carry transit traffic. (I.e. Large coperations - only sends trafic - neever advertise its capable of forwarding beyond consumers - might have two links for other reasons(scaling, redundancy, etc))
+        transmit AS - has connections to more than one AS - carries both transmit and local. (weather or nto multihome or transit depends on policy configured, looks similar.)
+
+        AS characteristics
+            each has one or more border routers - handle inter AS traffic
+            BGP speaker established sessionss with peers and advertises route info - path selection, reachability, etc. can have preferences like avoid AS10, etc - since have entire paths for selection.
+
+            
+    BGP works in TCP layer does not have to worry about IP lenght, but ip level still have to manage next hop level management.
+    
+    BGP how selecting best challenges
+        internet size  means large tabels, 
+        policy compliant pattsh, 
+        different AS use different path metrics, 
+        not inherent trust among As's.
+
+    BGP policy: learn - import routing info from my neighbors, spreak - export routing infomrating to my neighbors. (i.e. avoid As's, impleemnt min cost, trottling internet speet, etc. - due to flexibility in polciy design in BGP)
+        bgp provides the capcaity for reinforcing policies, policies not part of BGP they are provieded to BGP for routing config.
+        peering relationship - are free with no cost, cusotmer provider relationship - customer pay providers to reach rest of internet. (typically prefer money, customer >peer> providers)
+
+        peer relationship is free - only advertises to customers not provider or other peer. (only accept request from neighbors)
+        provider - only advertises to customers not provider or other peer. ( accept any they pay, all customers-infrastrructure backbone for example(used to be gov, mostly now private))
+        customer - advertises to all, obligated since they are paying.
+    
+    How to trust bgp backbone if there is a monopoly in market? things to think about.
