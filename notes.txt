@@ -520,3 +520,47 @@
         customer - advertises to all, obligated since they are paying.
     
     How to trust bgp backbone if there is a monopoly in market? things to think about.
+
+# LECTURE 15: IP Layer: NAT, IPv6, Multicast.
+
+    Nat - network address translation. - own private network. onlu up to 2^32?
+        exposes whole subnetwork as one ipadress visible outisde, inside can have many hosts.
+            goes to single router gateway, which converts source to public facing IP address; hosts dont know.
+            gateway has a NAT table holds extra service port numbers(kinda like ID) - short time lived, non permanent. Can be used to uniquely identify hosts to public dest. - some hashing can be used(w/ entire uniqueIP). dedicating ports typically not a problem.
+            cannot serve two server to public facing ipaddress easily is a limitation. ask question.
+
+        Class A,B,C ranges is reserved for private use, can use anything else.
+
+    Ipv6 - just a forward stream, does routing to scale, check sums to see if header is good else drops, no acks. Goes everything except addressibility.
+        changes - 128bit address space(1500 addr per sq ft on earth. classless), 
+            Qualiy of Serive - option to find better paths,latency, etc(replacement to TOS), 
+            Security and auth - checksum package integrity but new only verified can recieve packets, 
+            auto configuration - randomly sample ip adress conditioned on MAC addr  and use is (conflict is minimal - ipv4 was either manual or dhcp server) dhcp server implementaion also simple no need to maintail pool of address
+            enhanced routing func - mobile hosts, avoids the need to backandfort reqs if moving from subnets, auto config makes it easier to just sample instead of nonstop comms with dhcp server.
+                sampling idea is : prefix from dhcp server(dont assign ip addr), and we samle ip addr to use for our purposes.
+            support efficient multicast - server wants one flow to reach group of clients.
+            Rely on simple protocol extentions 
+            Enable a smooth transition path from IPv4 - backcompatability to IPv4 to maintain the narrowwaist/hourglass idea.
+            (series of 0's can be masked with ::, and slash structure from IPv4 still can be used)
+
+        prefix - FF is multicast, 001 is uniast. host addr is combination of prefix(given by dhcp) and sample host identifer(bitwise addition), prefix aggregation is possible? a lot of empty categories, some represent ipv4 to ipv6(i.e. 0000...:ff:ipv4).
+        
+        provider base plans - internet is organized into hierarchy of networks, 3 levleel: region(ipv4 doesnt have this - it had organizations only)-helps with routing(ipv4 first frozen holy held class info, can help implement geographical routing i.e. A* better algos), provider, subscriber.
+        Format - version, flow label(tell router focus more continous stream - router maintains state avoid switching, other stuff: latency, thoughput) and traffic class to specify TOS or Qos. Payload Lenght - length of data, Next header - how big will variable header, can add forward pointer to spcify fragmentation, security, TCP/UDP, etc.
+            no checksums in header, too redundant, have reliable develivery in phsycial(bits), frames(mac) and CRC. more in app, and transport layer.
+            by default no fragmentation and reassembly support.
+        
+        Transition - cant do terminate on single day and move on.
+            dual stack operations - map ipv4 to ipv6 and keep runnign operations. today not very useful.
+            Tunneling used to deal with networks wher IPV4 routers sit between two Ipv6 routers, encapsulate packets in Ipv4 format, until hit the next Ipv6 router. can go both ways. Ipv4 cannot by default support Ipv4 but thhough encapsulation can, without it just drops it.
+    
+    Multicast - One to many communication- video streaming like server flows to multiple hosts. routers support it too. Ipv4 had class D which supported multicast operation and always had first 3 1, rest were open to for gorups to use for multicast.
+        idea send to multicast address and it will send to group you want to send it to. router neds to understand which goes to groups. maintains state
+        Internet group management protocol - facilities the process of making groups, hosts indicate they want to join, router discovers, and implemented over IP. and sender verifies repicients on group, and sends.
+        joining - R sends membership report request, designated router(DR) recieves it and shart forwarding, DR periodically checks if want membership or not. can leave same way. DR recieved multicast signal and sends to group. Need support from router, else cannot(will take the form of individual connections).
+        
+    Overall so far:
+    ip layer - overall idea datagram delviery channel between hosts in any network under the best effort service model. Ipv6 is emerging, can do more, not widely adapted, BGP(routing protocol) provides extreme flexibility pay or not etc.
+    link layer and phsycial layer typically combined in modern Architecture, but can be separated with intention.
+
+# LECTURE 16:
