@@ -563,4 +563,54 @@
     ip layer - overall idea datagram delviery channel between hosts in any network under the best effort service model. Ipv6 is emerging, can do more, not widely adapted, BGP(routing protocol) provides extreme flexibility pay or not etc.
     link layer and phsycial layer typically combined in modern Architecture, but can be separated with intention.
 
-# LECTURE 16:
+# LECTURE 16: Transport Layer
+    IP,Link,Physical - overall host to host communications between two end points.
+
+    Transport layer bridges app and comms, though process to process communication.
+        (most important) provides gurantee - pacter order, exact one copy, etc. bec IP only gives best attempt. so transport layer to gurantee if wanted.
+        should support multiple app proc on a host(multiplexing)
+        supports arbitary large messages, types, length, etc.
+        limitations - fixed size socket buffer in OS.
+            fixes sized data transmission unit in network
+            computting and comms entities run at different speeds.
+
+    UDP: user datagram protocol
+        does not give you gurantee, is just best - effort, unreliable and unordered datagram service.
+        can do multiplexing/demultiplexing.
+        baremin reliability through optional checksum.(not unique, other layers also do it.)
+
+        it does it through, demultiplexing key - port: servers have well known ports, can be short lived, mapped to perm ports, dynamically allocated as well.
+            enables messages to be multiplexted to proper messages.
+            ports are addrs on individual hosts not across the internet.
+        
+        ports are implemented as message queues, is interleaved across application - lifo, fifo, etc. implemenataion
+
+        has headers - source port, destport(changes based on server, DNS, etc.), checksum, length(can do 65548 bytes and per app - IP layer deals with breakdowns if bottlenecks exists later on, etc.).
+            checksums - only care about integrety, sum on header + data + pseudo header (protocol nuber,the IP source, dest - doubel checks kinda, IP layer does it too).
+        
+        minimum specification make UDP very flexible, an end to end protocol built atop the UDP. RPCs, most common multimedia application, latency(streaming apps), etc.
+    
+        best of both world TCP/UDP (Security TLS and TCP, order, latency) = quic protocol (70% of internet traffic uses it) implemented a layer just on top of UDP.
+
+        no rate info, reliability of delivery, or variable in network bandwidth resources
+
+        Issues: arbitary comms(any hosts can talk to others when they want - doesnt ask perm just sends/talking, can cause clashes, stale data exchange), no realiability gurantee, no resource management - rate of data, slowdown or speed up.
+
+    TCP: two way reliable byte stream oriented protocl, TCP most widely used internet protocol, very closely tied to internet protocol (TP) - often called TCP IP layer.
+
+        connection oriented - some time taken to establish connection. app writes in bytes to TCP layers. APPs read and write data in byes, TCP sends in segments.
+        two way communication 
+        resource management - keep senders from over-running the reciever, flow control. (flow control in Link layer is Optional - doing it in Transport layer is recommended.)
+        congestion control - keep senders frmo over-running the network, adjust something like the window, adjust the rate, to not overwhem reciever, router, or other network agents, to ensure reliable delivery.
+
+    Wireless scanners - Current progress and usage.
+        imaging - wireless imaging in airport to see through clothes, instead of RGB in dark picks up data. extreme rain/fog leave RGB and move on wireless.
+        sensing - non-line of sight of sensing, sense how much sweat on hand(intense or not, can see flow of blood flow, though head,etc.)
+        comms/networking - managing large scale communication, i.e. sattelies and routers there.
+    
+
+
+    
+
+
+
