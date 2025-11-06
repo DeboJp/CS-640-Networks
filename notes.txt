@@ -594,7 +594,7 @@
 
         no rate info, reliability of delivery, or variable in network bandwidth resources
 
-        Issues: arbitary comms(any hosts can talk to others when they want - doesnt ask perm just sends/talking, can cause clashes, stale data exchange), no realiability gurantee, no resource management - rate of data, slowdown or speed up.
+        Issues: arbitary comms(any hosts can talk to others when they want - doesnt ask perm just sends/talking, can cause clashes, stale data exchange), no realiability gurantee(no acks,no order, packets can be lost, chcksum not enough), no resource management - rate of data, slowdown or speed up.
 
     TCP: two way reliable byte stream oriented protocl, TCP most widely used internet protocol, very closely tied to internet protocol (TP) - often called TCP IP layer.
 
@@ -608,9 +608,28 @@
         sensing - non-line of sight of sensing, sense how much sweat on hand(intense or not, can see flow of blood flow, though head,etc.)
         comms/networking - managing large scale communication, i.e. sattelies and routers there.
     
+# LECTURE 17: Transport Layer Connection Management - addressing UDP 1st issue.
+    UDP – message-oriented – treats each message as an independent unit and sends it as is.
+        - It cannot aggregate two messages because each UDP header includes a single source and destination port, and each port is bound to one process. There’s no mechanism to bundle multiple logical messages into one UDP datagram.
+        - It’s unwise to make datagrams too large, since oversized packets are more likely to be dropped later in transmission.
+    in general Ports and sockets allow concurrent multiplexing, enabling multiple logical communication channels over the same network interface
 
-
+    TCP dynamically creates and destroys a full-duplex communication channel between sender and receiver processes for reliable byte-stream exchange.        
+        Data flows as a continuous byte stream in buffers. TCP divides this stream into chunks called segments, which are passed down to IP for transmission.
+        To establish a connection, TCP uses a three-way handshake:
+            The sender transmits a byte stream of SYN segment containing its starting sequence number.
+            The receiver replies with a SYN-ACK containing its own starting sequence number.
+            The sender acknowledges the receiver’s sequence number.
+        Different starting sequence numbers are used to prevent old or delayed packets from previous connections (incarnation problem) from being mistaken as part of the current session. To mitigate this, sequence numbers are randomized, and connections are often kept in a TIME-WAIT state for 1–2 minutes before fully closing, allowing any straggling packets to expire, also allows us to recieve resent acks from server if ack dropped.
+        Termination seq: The client sends a FIN marker indicating it has no more data to send.
+            The server acknowledges the FIN and later sends its own FIN when it’s done transmitting.
+            The client finally acknowledges that, completing a four-way handshake.
+        4 steps instead of 3 because each direction of the connection (send/receive) must be closed independently, one side(client) might still need to accept delayed packets after signaling its own closure.
+            (but what if both TCP connections want to terminate - corner case).
+        In header flag decides where we look at - If SYN or FIN flags are set, the sequence number field is read., ACK ACK is set, the acknowledgment number field is used. If no flag, Sequence Number field refers to the first byte of data in that segment, receiver uses that number to place the data correctly in its reassembly buffer and to detect missing or out-of-order bytes.
     
+    IF care abt latency use UDP, creation and teardown of conenctions in TCP takes a while.
+
 
 
 
