@@ -630,6 +630,44 @@
     
     IF care abt latency use UDP, creation and teardown of conenctions in TCP takes a while.
 
+# LECTURE 18: Transport Layer: Connection Managemetn + reliability
+    
+    server starts listening passively before sending syn state, client recieves the syn and sends syn/ack  and connection established. 
+    when both decide they send syn simultaneously, they send syn + ack to each other and connection established. almost never prevered(happenes rarely). TCP therefore said to be assymetric connection.
+    
+    recieved fin, acknowledged for the fin client close, server sends fin, waits, recieves ack, waits again long time, close.
+    both send fin at same point, both send ack, closing waiting to recieve ack, here both wait for a long time, then close.
+
+    4 way to 3 way connection: client combined sending fin send and ack send into one.
+
+    all this is very slow, so if app is latency sensitive do UDP.
+
+    Sumary - TCP connection setup is assymetric, teardown is symmetric both ahve to send fins and acks(but can argue not symmetric due to time wait). most state schedule a timeout-triggered when expected responses does not happen.
+
+    SYN flood attack - client can bombard unlimited msgs for syn connection, server will try to send connections to each; standard behavior. server if naively implemented, server is overwhelmed - denial of service attack. (think how want to implement, if want to listen to all might make it too slow to move on to other states, so need to think carefully)
+
+
+    Reliability:
+        packets can be lost/dup/reordered during transmission, checksum not enough.
+
+        Challnege no in network observability: soln - sender ask receiver to ack every segment it sends, receiver can also check if bytestream misses any seg though sequence numbers(incremented by payload size not payload num).
+        
+        sender side detection - timeout, if sender does not receive ack after a timer per segment, start a timeout, if time runs out send it again.
+            Use RTT estimaation - moving average of measured RTT, EWMA - exponentially weighted moving average(naive can also work). Timeout can be constant(i.e.2) times Estimated RTT
+
+        receiever side stream of segents they recieve, 1.if missing segments in a small window- sry sender has to send it again:same longer waits, or 2. apply timeout again - implications to what app sees, low long, etc:i.e. longer wait times.
+            sender must keep segment until recieves ack from receiever or timeout sned again. reciever can explicitly also for missing segment.
+
+        Issue2: duplicated segment, easy to detect: look at seq number, not alterable, not affectable. if receive duplicates just reject it.
+
+        Issue 3: next class.
+
+# LECTURE 19:
+
+        
+
+
+
 
 
 
