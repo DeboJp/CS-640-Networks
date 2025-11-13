@@ -662,9 +662,57 @@
 
         Issue 3: next class.
 
-# LECTURE 19:
+# LECTURE 19: Transport layer: Reliability(II) + Congestion(I)
+
+        Issue 3: out of order segment, if there is a hole in the data, might be out of order receieveing after the hole.
+            can say strintly no to outof order segment, sender forced to retransmit. simple check bytestream seq to see if next byte  right seq.
+
+            causes: congestion, comms paths become heterogeneous. similar to missing daata .
+
+        Issue 4: Receiver Overwhelming, if buffers are getting full really fast, east to track.
+            ask sender to slow down explicitly, and by how much exactly, 
+
+        TCP mandatory to do sliding window, sending continously one after the other, addeses above issues. 
+            app writes at the end, recerver reads at beg. sliding window increments by how much byte sent(based on MTU, etc - sent based on intervals selected like 1500 bytes.)
+            everything behind next btye expected is in order, beyond may or maynot be TCP works to put them in order or drop, based on implementation. (so if deciede not to drop, does it become sequential async process? - i think abstracted away from app, kernel yes, but not necessarily from app cna be random)
+            kernel buffers given by OS used to communicate between computers(TCP happens here), App buffer just reads last byte to read in kernel buffer.
+            for everything sent we have an expected timeout to hear an acknowledgment back, if timeout without ack, we take it and make a copy and but bback at front on buffer and send again.
+            TCP windows update only if next sequences are in order, available pointer to read jumps to end. order beyond the window handles by TCP to ensure order or OS dev keeping random holes, sorting, etc.
+            now can detect duplicate and drop or missing, out of order if dont collapse or gap then know out of order(implementateion fix based on us), if nextbytetoread is getting to big to read need to tell sender to go slow or will be full so we send advertWindow = maxrecbuff - nextbyteexpected-1-lastbtyeread communicatng how slow recieving app is reading info .
 
         
+        TCP flow control - sender controls transmission rate, looks at the num of msgs waiting to be acked is lesser than advertised window - called effective window. app speed is throttled.
+            always happening, waits for more space on send buffer, and recieve buffer then send. continous process of speed up or slowdown.
+
+        Resource Managemen: the underlying network fabric and hardware are dynamic,  we dont know how many apps use the network and their reqs.
+            sender needs to be smart, rest can be dub - sender adjusts sending window baed on congestion signals(an event telling network contention **might** happen) from reciever.
+                congestion window similar to sending window, choose minimum of all adv window and current congestion window. define total data sender can push to network. 
+                optional MSS(Segmentsize), smallest invidivisble unit. default set if not chosen
+
+            option 1: adv window from receiver, but can ovewhelm the network routers maybe.
+            2: can randomly choose 0-adwindow, agian might overwhelm sometimes network routers.
+            3. just make window size 1, very conservative but keeps data pipe moving.
+
+            case 1 - recevve ack w/o timeout, effective BW = seg size/RTT, congestion window might be more than 1.
+            case 2: dont gets acks 1 size might be limit.
+
+            sender tries to find best size, from 1 to 2, 2-4 checks if working, in better tries more, if less tries less.(in order, both acts, no acks, out of order acks, etc.)
+                when outoforder - some weak signal of congestion(can be strict and see it as strong), stong is no ack hearing at all.
+            
+            idea of doing exponential increase to find upper limit till you hit ceiling - TCP slow slart, no idea of rollback.
+                outoforder then divide window by 2 or called congestion threshold = congestion window/2
+                if local timeout congestion window turn into 1. go till last working size that worked exponentially then go linearly.
+
+    What happens in TCP today next class.
+
+    # LECTURE 20:
+
+
+                 
+
+
+        
+
 
 
 
