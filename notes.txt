@@ -735,6 +735,7 @@
                     fast retransmit, MD : ss_thresh = cwnd/2.
                     w = w+1 for each and every ack.(more dup acks mean not delievered but recieved some duplicates - you know what thing recieved in the bugger, so keep increasing size.) Once you start getting new acks we go back to w = w +1/w.
 
+                TCP Reno or any congestion algo uses slow start, aimd, fast retransmit/recovery, per-ack adjustment.
                     
                     
                     
