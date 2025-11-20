@@ -705,42 +705,81 @@
 
     What happens in TCP today next class.
 
-    # LECTURE 20: Transport Layer: Congestion(II)
-        Acking strategies(reliability review):
-            1. every acks get one packet (selective repeats)
-            2. cumulative acks all packets up to a specifc packet (used in TCP)
-            3. negative acks allows a reciever to ask for a packet that is presumed to be lost.(avoids delay with timeouts.)
+# LECTURE 20: Transport Layer: Congestion(II)
+    Acking strategies(reliability review):
+        1. every acks get one packet (selective repeats)
+        2. cumulative acks all packets up to a specifc packet (used in TCP)
+        3. negative acks allows a reciever to ask for a packet that is presumed to be lost.(avoids delay with timeouts.)
 
-        Basic go back n recovery - reciever drops packets out of order, sender sends packets after timeout and all other send in those timeouts(entire window).
+    Basic go back n recovery - reciever drops packets out of order, sender sends packets after timeout and all other send in those timeouts(entire window).
 
-        TCP Go Back N Variant(cumulative acks) - same as before, but sender sends past accepted ack only(accepting out of order, but sending last filled ack before out of order packet), sender just knows which packets were deleivered which werent. same as before send the window.
-            Fast Retransmit( and then Timeout) - whenver you recieve 3 duplicate cumulative acks. you can innfer this is a strong signal that data 2 was never delievered. does not wait till end of timemout but sends data again.
-                only useful for a few losses, if several better to go to timeout.
+    TCP Go Back N Variant(cumulative acks) - same as before, but sender sends past accepted ack only(accepting out of order, but sending last filled ack before out of order packet), sender just knows which packets were deleivered which werent. same as before send the window.
+        Fast Retransmit( and then Timeout) - whenver you recieve 3 duplicate cumulative acks. you can innfer this is a strong signal that data 2 was never delievered. does not wait till end of timemout but sends data again.
+            only useful for a few losses, if several better to go to timeout.
+    
+    SACK - (supported by TCP as optional) - uses bit masks. to acept what it can and retransmit what it couldnt?not sure
+
+    congestion control:
+        sender has control over window size also called congestion window size.
+            utilization - each networking hardware is fully underutilized
+            fairness - hardware is equally shared among other network users.
+                multiplicative increase or decrease between two users: relative fairness is same, absolute fairness not(distance from fairness like increase.)
+                additive: increase will imporve relative fairness, absolute fairness does not improve(improvement is perpendiculat to fairness line).
+
+                idea is to promote fairness if someone starts late. need to stay under utilization curve, and closer to fairness line.
+                    additive increase and multiplicative decrease - AIMD, i think its situation dependent, but said to be likely stable and bring you back to optimimal point regardless of where you start.(inaddition to slow start)
+
+            
+        congestion avoidance - start with slow start, once you first hit loss of pacets throttle by half, then do AIMD until optimal. for severe cases(back to 1 due to timeout) but exponential till prev max change's half, then AIMD.
+            Fast Recovery - on 3 dup acks
+                fast retransmit, MD : ss_thresh = cwnd/2. (we halve the full current window, not just the recent progress.)
+                w = w+1 for each and every ack.(more dup acks mean not delievered but recieved some duplicates - you know what thing recieved in the bugger, so keep increasing size.) Once you start getting new acks we go back to w = w +1/w.
+
+        congestion control: an ack indicates there is room to send data. 
         
-        SACK - (supported by TCP as optional) - uses bit masks. to acept what it can and retransmit what it couldnt?not sure
+        TCP Reno or any congestion algo uses slow start, aimd, fast retransmit/recovery, per-ack adjustment.
+            (old implementation was TCP Tahoe - timeout(only method of congestion detection), slow start, AI. 3dup => cwd = 1, not effective)
 
-        congestion control:
-            sender has control over window size also called congestion window size.
-                utilization - each networking hardware is fully underutilized
-                fairness - hardware is equally shared among other network users.
-                    multiplicative increase or decrease between two users: relative fairness is same, absolute fairness not(distance from fairness like increase.)
-                    additive: increase will imporve relative fairness, absolute fairness does not improve(improvement is perpendiculat to fairness line).
-
-                    idea is to promote fairness if someone starts late. need to stay under utilization curve, and closer to fairness line.
-                        additive increase and multiplicative decrease - AIMD, i think its situation dependent, but said to be likely stable and bring you back to optimimal point regardless of where you start.(inaddition to slow start)
-
-                
-            congestion avoidance - start with slow start, once you first hit loss of pacets throttle by half, then do AIMD until optimal. for severe cases(back to 1 due to timeout) but exponential till prev max change's half, then AIMD.
-                Fast Recovery - on 3 dup acks
-                    fast retransmit, MD : ss_thresh = cwnd/2.
-                    w = w+1 for each and every ack.(more dup acks mean not delievered but recieved some duplicates - you know what thing recieved in the bugger, so keep increasing size.) Once you start getting new acks we go back to w = w +1/w.
-
-                TCP Reno or any congestion algo uses slow start, aimd, fast retransmit/recovery, per-ack adjustment.
                     
-                    
-                    
-                
+# Lecture 21: In-Network Support for TCP    
+    
+    Issue 1: silly window syndrome: sendner writing too slowly or reciever reding too slowly. too long hurt atency, too short, hurt bandwidth.
+        Nagles Algo: a self-clocking soln: if both available data and window size >= MSS send the full segment, else: if there is unAcked data in flight buffer the new data until a ACK arrives, else send all the new data now.
+        favors increasing latency (slow down dont waste bandwidth).
+    
+    Issue 2: timeout setwup during retransmissions
+        dont know how to calculate timeout window, someitmes long due to ack coming long after retransmission, other times fast a few ms after retransmission sent.
+        soln:when there is retransmission, dont do RTT, do 2x increase in timeout after each transmission. just a heyristic.
 
+    TCP Modeling: Performance
+        steady state, packets transferred = area under curve.
+            bandwidth = 3/4 W * MSS/RTT, W is set when there is congestion(timeout, 3dup, etc - loss rate)
+                1packet loss = loss rate = p  = 8/3W^2
+
+        TCP is RTT fair
+
+        TCO RENO bad for short lived conncections, Additive increase phase really slow (1.4 hrs). usually only realize 1/2 ish bandwidth.
+            most file transfers are very small, tcp never reaches steady state - slow start dominates.
+            TCP fairness is calculated on per flow basis.
+                (some cheat by creating multiple flows, or maintain previous state)
+            TLS is widely used adds 1-2 RTT transit(starts after tcp handshake)
+            Google QUIC builds on top UDP, arguably better.
+            but for long flows AIMD/TCP REno is better.
+            
+    In Network Support fot TCP:
+        what can we do in network to make tcp faster.
+
+        Active Queue Management(AQM): 
+            enqueing rate > dequeing rate in router 
+                packets get dropped if no space. space acts as a shock buffer.
+
+            Naive approach - FIFO sheduling discipline. - Lock out problem(router full, other flow stuck at 1),
+                we can do fair queing(FQ) - divide the buffer,virtual queues 1 for each flow. allocate resoruces more fairly. 
+                    (can do Max-min fairness(round robin) now - divide underflows to serve uniformly to participants serving)
+                        (can game system by sending variable sized packets. - do bit by bit Round robin that penalized large packets - uss finish times, arrival for last bit), only pickup packets by small FI(incentivises smaller packets)
+
+
+                 
 
 
 
