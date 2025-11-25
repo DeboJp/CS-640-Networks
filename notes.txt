@@ -778,7 +778,81 @@
                     (can do Max-min fairness(round robin) now - divide underflows to serve uniformly to participants serving)
                         (can game system by sending variable sized packets. - do bit by bit Round robin that penalized large packets - uss finish times, arrival for last bit), only pickup packets by small FI(incentivises smaller packets)
 
+# Lecture 22: In Network Support for TCP + Infrastructure Services.
 
+            Random Early Detection(RED): detect incipient congestion
+                maintains Weighted Moving Average (EWMA) que of length - filters out short-term bursts (noise) and focuses on long-term congestion.
+                Traditionally (DropTail), we only drop when the buffer is completely full.
+                    RED has min and max threshold. if avg <= min then does same as before Enqueue (accept). if avg >= max drop packets P = 1. avg in between Drop packet with some lower probability P early on much before buffer is full.
+                good at keeping average queue length steady. allows gradual decay in performance, useful causse it allows us to do gradual decay in router congestion control as well, instead of Global Synchronization (where all TCP flows back off at the exact same time). It allows flows to back off individually.
+
+            Explicit Congestion Notification(ECN): allows end to end notification of network congestion. every router starts talking and explicitly
+                before congestion, while building up. routers send with some flag turned. and reciever only realizes some router realized congestion and send back to sender. (not every router creating same packet and notifying to reciever.)
+                sender has to endable ECN in Terms of service header(IP TOS header) (00 - no ECN, 10/01 - sender is capable of ECN support, 11 - congestion encountered in router bit flipped) works for only if both parties support ECN.
+
+        
+        Reliable Link Layer: Packets are successfully delivered to the receiver.
+           if no packets drops, dups, out of order. then do i still need end to end transport layer.
+
+           reliable layer can handle packet drops.packet dups, out of order also handled by link layer.
+                TCP control not as necessary. w/ caveat Link Layer only guarantees reliability across that specific link. not guarantee the packet won't be dropped by a buffer overflow at a router 3 hops away, or that the router won't crash and lose the packet.
+
+            Ethernet is not reliable by default, so would always need some level of TCP control.
+
+            TCP also allows measure of RTT of entire route(link only sees neighbor). Allows explicit feedback(ECN just an example, selective repeat, negative acks, etc.), (bandwidth probing, flow control, window adjustment - all these are good, without these need to figureout manally in link layer) 
+                link layers a lot of packets will be dropped on steady state(introduce variable latency (jitter). If the link layer keeps trying to retransmit, the RTT estimate in TCP goes up, confusing the sender.), can work on complex application logic in meantime?
+        
+        Active Network
+            a proposal that allows packets to carry programs. On-path entities can execute the logic.
+            programmable network: every switch and router is capable of doing adaptation to packets. i.e. buffer management and queue management - round robin bit by bit, etc. has OS, progamming languages for them.
+            SmartNIC: NICs with general purpose processors, domain-specific accelerators programmable DMA enginers, and SRAM/DRAM. (loadbalalncing efforts, switching, etc of Servers move to NIC - server has the NIC) examples: AWS nitro, AMD Pensando (DPU), etc.
+                boom an Data Centers are happening in such Active Network areas, NICS, etc.
+
+    
+    Application Layer Serives(Infrastructure Services): also relavent to how networks run today.
+        Domain Name Service (DNS); SNMP(Simple Network Management Protocol)
+
+        technically an application layer program that is running.
+        DNS motivation: Naming host. google.com converts to 32bit(IPv4) & 128bit(IPv6) address 
+            hard for humans to remember natural language; goal is human friendly names to hosts: but routing still needs IP, define and lookup the mapping between name and IP.
+            before DNS we had naive approach locally, between english domain name and Ip. ensure consistency (copy paste) across entire internet. does not scale, but still useful for small scaled local networks. (look at /etc/hosts file on CS dept machine)
+            DNS is the distributed name resolution system, many name servers(NSs) are distributed throughout the internet,(UW madison entity hosts name servers, google themselves, etc.)
+                Domain names(DNs) are hierarchical, a single NS doesnt need to store the name for eveery host of the internet. specific to org and suborg are deployed in a tree like structure.
+                DNs can be mapped to IPV/4IPv6 and other DNS.
+                queries are issued to a seq of NSs, each knows abt a different part of DN hierarchy, answers can be caached to avoid overhead of freq lookups.(typically start at root - everyone needs to know)
+
+                the hierarchy starts from rightmost and periods separate them (cs.wisc.edu) edu topmost, cs bottom. DNs are processed right to left, period separator(no limit - unlike IP)
+                    Top level domain(TLD) rightmost: edu,com,uk,info,ai, etc.
+                    responsibility for resolution divided into zones: ICANN is responsible for the zone containing all TLDs, redundantly stored. not a single server, multiple server. (NSs cache name resolutions too name-ip)
+                    Records: every NS only stores only its level and next level and TTL(freshness). is type is A = IPv4, AAAA = IPv6, NS = not directly the adress of next host, dom name for next DNS hierary.
+                
+                name resolution ALgo:
+                not a one shot algorithm, hierarchical algo - client contacts the root name server (client contacts local name server which is given by DHCP router or set in its config, local NS constacts the root name server then the TLD, etc.)
+                root ns provided the NS, a record for NS that can resolve TLD.
+                local NS contacts the NS for TLD.
+                NS for TDL provides NS, a record for NS that can resolve SLD
+                local NS contacts NS for SLD
+                NS for SLD provided a record for the domain or NS, a record for NS that can resolve the domain
+                can have local DNS server network chokepoint/exit of network which will cache any records it recieved - to avoid frequent requests to root and tree traversal.
+
+                Name Resolution Opimization: Load balaning(often achieved via CDNs content delivery networks) - assign short TTL to records, return different A records for each query for DN, Cycle through A records in weighted round robin order, weight based on server load.
+                    geo location based server selection - alot servers closest to client. used by Content delivery networks.  lowest latency, highest bandwidth. google.com will have several ips geo location based for this.
+
+        Why SNMP? network management essentially. (also application level protoval should work on every thing, TCP or wifi, etc.)
+            track all devices that are connected, fault managemnt, diagnostic questiosn: load, how well balancing, etc.
+            not specific to network topology, etc. should be standardized, extensible, portable.
+            each device/agent has its local data. center server also has all data so other agents can query printer data, etc. some level of expose information exposure(how many color printers in my network,etc.).
+
+            only has 5 commands. central server has: get-reqeust(fetch a val), get-next-request(ftch next val in tree), get-response(reply to fetch op), set-request(store val), Agent (Device/Router): trap(an event) (A "Trap" is an unsolicited alarm sent by the router to the server (e.g., "I just rebooted!" or "Link went down!").)
+
+            The SNMP client pull, server push architechture. 
+
+            runs on UDP, UDP Port 161: Used by the Agent to receive requests (Polling). UDP Port 162: Used by the Manager to receive Traps (Notifications).
+
+
+
+        
+        
                  
 
 
