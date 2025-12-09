@@ -849,7 +849,8 @@
 
             runs on UDP, UDP Port 161: Used by the Agent to receive requests (Polling). UDP Port 162: Used by the Manager to receive Traps (Notifications).
 
-# LECTURE 23: Application Layer in TCP/IP
+# LECTURE 23: Application Layer in TCP/IP 
+    ** might have some inconsistencies ** - Lecture went really quick
 
     apps can only requst tcp/usd, netwok conditions etc are not shared.
         app layer resp of taking account of uncertainty of data arriving.
