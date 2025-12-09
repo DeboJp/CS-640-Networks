@@ -849,23 +849,150 @@
 
             runs on UDP, UDP Port 161: Used by the Agent to receive requests (Polling). UDP Port 162: Used by the Manager to receive Traps (Notifications).
 
+# LECTURE 23: Application Layer in TCP/IP
 
+    apps can only requst tcp/usd, netwok conditions etc are not shared.
+        app layer resp of taking account of uncertainty of data arriving.
+        coordination logic for app to app.    
 
+    Web/HTTps
+        inspired by hytertex, doc linking another doc.
+
+    Web
+        a uniform resource locator: specify loc of an obj, perform dns lookups to obtain the ip addr of the web serter to contact.
+        clients and web servers communicate using HTTP.
+    
+    HTTP(hypertext transfer protocol)
+        underlying network: a reliable ocmms pipe with arb bandwidth - runs atop of TCP.
+        plain text msgs in a req/resp seq; lines terminated by /r/n.
+
+    
+    fetching a webpage(or some data - http 1.0) - DNS lookup - Establish TCP connection - SEND HTTP req - recieve HTTP reply - Close TCP conn- Parse HTML
+        closing expensie process both client and server needs to agree.
+        for /web/obj extra paths, read DNC, open tCP sendreq&recieve close tcp, parse.
+
+        problem high overheads, each obj 2 RTTS for connec setup + min 1 RTT for fetting and 2RTT again for teardown. (overhead reduced for large files open and close take smaller perctange of total RTT)
+            never hit peak performance if lived time short, since MSS start at 1 and slow start.
+
+    1.1 - introduces persistent connections - may have more fetches or not, just keep it open.
+        exchange multiple req/resp msg over same Cp cnnection. Pros: throughput, slow start occurs once.
+        cons: no point keeping connections open for so long if 1 req per 10 mins. server has to dedicate resources to maintain each of open connections.
+        throughput benefits far outweigh this overhead.
+    
+    more progress on demand versions, other improvements, etc 1.2,3,4 etc.
+
+    P2Ps
+        a peer to peer network allows a community of users to pool thier resources.(storage,cpu,etc)
+        (before client,server here just peers)
+        p2p networks are decentralized and self organizing.
+        no particular entity manages p2p networks. (1 peer down does not mean overall network down, google server down its down) - no reliable throughput? unclear who pays who.
+
+        example BitTorrent - p2p file sharing protocol based on replicating the file or rather replicating segments off the file called pieces of chunks
+            any particular piece can usually be downloaded from ultiple peers, even f only one peer has the entire file.
+            avoid bottleneck of having only one source for a file, i.e. does need to wait for que for 1 single server maxed out, p2p looks for distributed nature.
+                cons: to help some one else at your cost, no gurantee, etc. but flourished when everyone is active.
+            todays world with economic incentives, p2p is not used (not easily observable,etc)
+
+        execution logic: if you download you have to participate in uploading. more downlading more replication occurs - distribute load proportionally.
+            pieces are downloaded in random order to avoid a situatio n where peers find themselves lacking the same set of pieces.
         
+        coordination logic: swarms 
+            each file is shared via its own indep network called swarms
+            the swarm starts as a single pers with compelete copy of the file, a note wants todownload the file and join the swarm becoming 2nd mmber, downloading makes it another source,and other members can .
+            1. P joins the swarm, 2 a tracker(distributed algo-runs partially on each p no server) replies tot P with partial list of peers, 3&4. P established CP connection with swarm ID. 
+            5. each peers begins by sending bitmaps(what has vs not) of blocks it has. this is used by p to decide what block to get. 6. when downloading is finished bitmaps are eexchanged with all connected peers. 
+            7.peers download blaocks in a random order to avoid getting bloaced on the smae place.
+
+        cryptocurrency is also in the p2p world.
+
+
+    comms bottle nets:
+        first mile: client to ISP
+        last mile: server to ISP
+        server: compute/memory limitations
+        isp: interconnections or peering congestion inside the network.
+        solution: caching at various locations to overcome the latter three bottlenecks to lwoer the loads at other costs
+        1st one cannot be helped(client side needs good link to isp, etc.)
+
+    Proxy Chaches and CDN:
+        limitations of web caching, much content is not cachable - like dynamic data, cookies, ssl, analystics.
+        CDN.
+
+
+#Guest Lectue IPv6 and WiscNetIMC, 
+    cool stuff: IPvFOO
+    https://www.wiscnet.net
+    https://research.wiscnet.net/WiSciFest/
+        https://test-ipv6.com/
+    all giants google,cloudfare, amazon apple meta, etc on ipv6
+    
+        happy eyeballs tester to use more modern networks - test on app layer.
+
+# LECTURE 24: 
+
+    Caching at various locs to overcome the last mile(server to ISPP), server(compute/mem limitations), isp interconnections or peer to peer(congestion inside the network), but first mile(client to isp) cannot be helped.
+
+    p2p helps reduce burden on each peer vs a single server but it has some pros and cons.
+
+    continusing from last lec:
+
+    App3: Proxy Caches and CDNs.
+        Cache close to the client - under admin control of the client side AS.
+
+            explicit proxy - req config the browser
+
+            implicit prox - service providers deploy on on-path proxy. intercept and handle web requests.
+
+        limitations: much content is not cacheable - caching policy
+            static good but dynamic not great(most will be cache miss).
+                stale data gets evicted by some polciy.
+
+        CDN:
+            proactive content replication - content provider contracts with a CDN
         
-                 
+        seerver selection:
+            live server - for availability
+            lowest load - to balance the load across servers
+            closest - nearest geo, or in round trip time.
+            best - performe - throughput, latency.
+            cheapest bandwidth, electricity, etc.
+            (requires continous monitoring of liveness, load and performance.)
 
+            Server selection mechanish - 
+                app does http redirection. (redirects to another server based on above policy, gores to original then redirected.)
+                    pros - fine grained, Cons - expensive
+                naming. - dns based server selection (single subdomain can have multiple options, gives closes to you geographically and least crowded. DNS already has it)
+                    pros - avoid tcp set up delays, dns caching reduces overheads, relaively fine control. Cons - based on ip addr of local DNS server, DNS TTL limits adoption.
+    what are the learened elssions on building network apps.
+        3 apps (web/HTTP),P2p(i.e. skype running on background to run someone elses work - idle mahcines participated for resharing(thus free) - Zoom is not p2p, its client-server arch), CDN and webcaching.
 
+    security - important, transport layer secury(TLS-cryptocurrency-prime factoring algorithm) and HTTP(s - s is security) - didnt get to cover but is very important.
+    
+    Course Objectives highlevel Review:
+        Fundamentals of Computer Networks
+            Key takeaways:
+                layering -> complexity
+                Hierarchy -> Scalability
+                End-to-End -> labor of division
+                Mechanism and policy -> flexibility
+        Develop small-scale network apps
+            Key Takeaways:
+                App representation
+                Transport protocol selection
+                Application specific optimization to enable better transport protocol
+        Evaluate design trade-offs of networked systems
+            Key Takeaways:
+                Network performance depends on the compute efficiency
+                the decentralization as the first requiremetn when designing protocols
+                dont forget packet headers and channel/flow in-network states
 
-        
-                 
+    Where next steaps heading:
+        most things happening phycal layer.(Satellite networks-exponentially growing, monopoly - BGP starts getting iteresting). 
+        PHY+MAC: 5G,7G,etc
+        transport layer a lot of developments happeing(QUIC)
+        App: vehicular, mixed reality, internet of everything.
+        Quantum Netoworking(quantum can break prime factoring algorithm  - how to secure, etc.(madison to chicago, upstate-building quantum networks already)).
 
-
-        
-
-
-
-
-
-
-
+End of Course Lectures.
+Course: No public page available, checkout CS640 offering on UW-Madison (Most of the mathematical formulas/calculations not covered in txt notes.).    
+    Next Course Progression adviced: CS707-Wireless Networking, CS740-Advanced Computer Networks, CS839: Big Ideas in Wireless(Akash teaching next sem)
